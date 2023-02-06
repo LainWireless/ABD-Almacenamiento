@@ -346,12 +346,14 @@ CREATE
 
 **Diferencias principales entre ambos gestores:**
 - En Oracle se usan ficheros (datafiles) y en Postgres usamos directorios.
-- Mientras que Oracle permite una definición más precisa de estos tablespaces, Postgres se queda un poco corto ya que ni siquiera podemos definir un tamaño máximo.
-- Los tablespaces de Oracle tienen una mayor capacidad de control y administración, mientras que en Postgres su administración es más simplificada. 
-- Oracle permite crear tablespaces temporales, lo cual no existe en Postgres. 
-- Los tablespaces de Oracle tienen la capacidad de almacenar objetos como índices, tablas, vistas, procedimientos almacenados, etc. En Postgres, los tablespaces solo se usan para almacenar tablas.
-- En Oracle los tablespaces se pueden crear en un disco local, en un disco compartido, en un disco externo, etc. En Postgres, solo se pueden crear en un disco local.
 
+      Ambos sistemas de base de datos organizan los archivos de datos en una estructura de almacenamiento similar. En Oracle, los archivos de datos se denominan datafiles y se almacenan en tablespaces. En Postgres, los archivos de datos se denominan archivos y se almacenan en directorios.
+  
+- Los tablespaces de Oracle tienen una mayor capacidad de control y administración, mientras que en Postgres su administración es más simplificada. Mientras que Oracle permite una definición más precisa de estos tablespaces, Postgres se queda un poco corto ya que ni siquiera podemos definir un tamaño máximo.
+  
+- Los tablespaces de Oracle tienen la capacidad de almacenar objetos como índices, tablas, vistas, procedimientos almacenados, etc. En Postgres, la única diferencia es que los tablespaces de Postgres no se usan para almacenar tablas. En su lugar, se usan para almacenar objetos relacionados con la base de datos, como índices, vistas y procedimientos almacenados.
+  
+- En Oracle los tablespaces se pueden crear en discos externos, como discos SAS o discos fibre channel. En Postgres, no podemos hacerlo.
 
 ## MySQL:
 
@@ -592,3 +594,41 @@ MAXTRANS int
 STORAGE storage_clause
 PARALLEL parallel_clause
 ```
+
+**Diferecias entre Oracle y MongoDB:**
+
+Al Oracle ser un motor de base de datos relacional y MongoDB ser un motor de base de datos no relacional, vamos a encontrar numerosas diferencias:
+
+- Los índices en Oracle se crean utilizando sentencias SQL, mientras que en MongoDB se crean usando comandos Javascript.
+
+- Oracle admite índices bitmap, mientras que MongoDB no.
+  
+      Un índice bitmap en Oracle es un índice de datos que se utiliza para mejorar el rendimiento de las consultas en una base de datos Oracle. Estos índices se crean almacenando información en forma de bits, donde cada bit representa un valor de la columna de la tabla. Esto permite a Oracle rastrear los datos que coinciden con los criterios de la consulta mucho más rápidamente que otros tipos de índices.
+
+- Oracle admite índices espaciales, mientras que MongoDB no.
+  
+       Un índice espacial en Oracle es una herramienta para la administración de espacialidades en bases de datos relacionales. Esto permite que los usuarios almacenen, consulten y analicen datos espaciales en Oracle Database. Los índices espaciales almacenan la información geográfica, como coordenadas, direcciones, códigos postales, etc., de manera que los usuarios puedan realizar búsquedas más rápidamente. Oracle utiliza el lenguaje de consulta espacial Open GIS, que permite a los usuarios realizar búsquedas por áreas geográficas, distancias, direcciones, etc.
+
+       MongoDB, por otro lado, no admite índices espaciales. En su lugar, proporciona una API de geolocalización para almacenar y consultar datos geográficos.
+
+- Los índices en Oracle se almacenan en la memoria principal, mientras que MongoDB los almacena en la memoria secundaria.
+  
+       Oracle se almacena en la memoria principal (RAM) porque se ejecuta en tiempo real y requiere constantemente acceso a datos. En la memoria principal se almacena la información temporalmente mientras se procesa. 
+
+       MongoDB se almacena en la memoria secundaria (disco duro), ya que proporciona una forma permanente de almacenar datos. Esto significa que los datos se almacenan en un lugar seguro, donde pueden consultarse a largo plazo.
+
+- Oracle admite índices funcionales, mientras que MongoDB no.
+
+       Los índices funcionales son índices construidos a partir de una o más funciones o expresiones. Estos índices permiten a los usuarios realizar búsquedas complejas sin necesidad de recorrer todos los documentos de la colección. Oracle admite índices funcionales, permitiendo a los usuarios crearlos en sus tablas para mejorar el rendimiento de las consultas. 
+       
+       MongoDB, por otro lado, no admite índices funcionales. En su lugar, depende de índices compuestos para optimizar el rendimiento de las consultas.
+
+- Los índices en Oracle se crean en tiempo de compilación, mientras que en MongoDB se crean en tiempo de ejecución.
+  
+       Los índices en Oracle se crean cuando se compila una consulta, antes de que se ejecute. Esto significa que se crean durante el proceso de preparación de la consulta y se almacenan en la memoria. Esto mejora el tiempo de respuesta y la eficiencia de la consulta.
+
+       En MongoDB, los índices se crean en tiempo de ejecución. Esto significa que los índices se crean cuando se ejecuta una consulta o cuando se realiza una actualización de los datos. Esto permite una mayor flexibilidad ya que los índices se pueden crear o modificar sin necesidad de recargar la base de datos. Esto también mejora el tiempo de respuesta, ya que los índices se generan inmediatamente cuando se necesitan.
+
+- Oracle permite la creación de índices en columnas virtuales, mientras que MongoDB no.
+
+       La creación de índices en columnas virtuales en Oracle es una característica que permite a los usuarios crear índices en columnas virtuales a partir de datos existentes en tablas relacionales. Esto se logra almacenando los datos en una tabla de índice de forma compacta, lo que mejora notablemente el rendimiento de la consulta. El índice se puede crear en columnas virtuales como columnas en el select o en los where. Esta característica es especialmente útil cuando hay datos redundantes en una tabla.
