@@ -1,3 +1,25 @@
+## Ejercicio 2:
+
+**Realizad una consulta al diccionario de datos que muestre qué índices existen para objetos pertenecientes al esquema de SCOTT y sobre qué columnas están definidos.**
+
+```sql
+select index_name, column_name,table_name, table_owner
+from dba_ind_columns
+where table_owner='SCOTT';
+```
+
+![pgr-2](capturas/ejercicio2/pgr-2.PNG)
+
+**Averiguad en qué fichero o ficheros de datos se encuentran las extensiones de sus segmentos correspondientes.**
+
+```sql
+select FILE_NAME, TABLESPACE_NAME from dba_data_files 
+where tablespace_name=(select distinct tablespace_name 
+from DBA_SEGMENTS where segment_type='INDEX' and owner='SCOTT');
+```
+
+![pgr-2-1](capturas/ejercicio2/pgr-2-1.PNG)
+
 ## Ejercicio 3:
 
 ##### Comprobamos el valor máximo de deptno:
@@ -233,3 +255,39 @@ Después de compilar todos los procedimientos y funciones, ejecutaremos el proce
 ![Ejercicio6_BalanceoCargaTemp](capturas/Ejercicio6/6.3.BalanceoCargaTemp.png)
 
 Como podemos comprobar se ha realizado correctamente el balanceo de la carga de usuarios entre cada uno de los tablespaces temporales existentes.
+
+## Ejercicio 5:
+
+**Meted las tablas EMP y DEPT de SCOTT en un cluster.**
+
+```sql
+CREATE TABLESPACE tablespacec1 
+DATAFILE '/opt/oracle/oradata/ORCLCDB/cluster1.dbf' SIZE 1M AUTOEXTEND ON;
+
+CREATE CLUSTER tablasempdept(DEPTNO NUMBER(2)) TABLESPACE tablespacec1;
+
+CREATE INDEX INDEXNAME ON CLUSTER tablasempdept;
+
+CREATE TABLE SCOTT.DEPT1
+(
+ DEPTNO NUMBER(2),
+ DNAME VARCHAR2(14),
+ LOC VARCHAR2(13),
+ CONSTRAINT PK_DEPT1 PRIMARY KEY (DEPTNO))
+ CLUSTER tablasempdept (DEPTNO);
+
+CREATE TABLE SCOTT.EMP1
+(
+ EMPNO NUMBER(4),
+ ENAME VARCHAR2(10),
+ JOB VARCHAR2(9),
+ MGR NUMBER(4),
+ HIREDATE DATE,
+ SAL NUMBER(7, 2),
+ COMM NUMBER(7, 2),
+ DEPTNO NUMBER(2),
+ CONSTRAINT FK_DEPTNO1 FOREIGN KEY (DEPTNO) REFERENCES SCOTT.DEPT1 (DEPTNO),
+ CONSTRAINT PK_EMP1 PRIMARY KEY (EMPNO)
+)
+ CLUSTER tablasempdept (DEPTNO);
+```
