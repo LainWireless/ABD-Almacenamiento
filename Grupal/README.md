@@ -8,7 +8,7 @@ from dba_ind_columns
 where table_owner='SCOTT';
 ```
 
-![pgr-2](capturas/ejercicio2/pgr-2.PNG)
+![pgr-2](capturas/Ejercicio2/pgr-2.PNG)
 
 **Averiguad en qué fichero o ficheros de datos se encuentran las extensiones de sus segmentos correspondientes.**
 
@@ -18,7 +18,7 @@ where tablespace_name=(select distinct tablespace_name
 from DBA_SEGMENTS where segment_type='INDEX' and owner='SCOTT');
 ```
 
-![pgr-2-1](capturas/ejercicio2/pgr-2-1.PNG)
+![pgr-2-1](capturas/Ejercicio2/pgr-2-1.PNG)
 
 ## Ejercicio 3:
 
