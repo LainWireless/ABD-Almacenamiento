@@ -1,9 +1,7 @@
 # Alumno 3 (Alfonso Roldán Amador):
 ## ORACLE:
 
-**1. Muestra los objetos a los que pertenecen las extensiones del
-tablespace TS2 (creado por Alumno 2) y el tamaño de cada una
-de ellas.**
+### 1. Muestra los objetos a los que pertenecen las extensiones del tablespace TS2 (creado por Alumno 2) y el tamaño de cada una de ellas.
 
 Replicaremos el proceso de creación del tablespace TS2 tal y como hizo el alumno 2 (2 ficheros en rutas diferentes de 1M cada uno no autoextensibles). Posteriormente insertaremos los registros hasta llenar el tablespace.
 
@@ -17,9 +15,7 @@ SELECT SEGMENT_NAME, EXTENT_ID, BYTES FROM DBA_EXTENTS WHERE TABLESPACE_NAME = '
 
 
 
-**2. Borra la tabla que está llenando TS2 consiguiendo que vuelvan
-a existir extensiones libres. Añade después otro fichero de
-datos a TS2.**
+### 2. Borra la tabla que está llenando TS2 consiguiendo que vuelvan a existir extensiones libres. Añade después otro fichero de datos a TS2.
 
 Para borrar la tabla que está llenando TS2 podemos usar **"Truncate table"**. Con esto se eliminará la tabla y además se liberará espacio en el disco:
 
@@ -38,13 +34,7 @@ ALTER TABLESPACE TS2 ADD DATAFILE '/opt/oracle/oradata/ORCLCDB/extra.dbf' SIZE 1
 ![Ejercicio2_TruncateTable](capturas/2.2.add_datafile.png)
 
 
-**3. Crea el tablespace TS3 gestionado localmente con un tamaño de
-extension uniforme de 128K y un fichero de datos asociado.
-Cambia la ubicación del fichero de datos y modifica la base
-de datos para que pueda acceder al mismo. Crea en TS3 dos
-tablas e inserta registros en las mismas. Comprueba que
-segmentos tiene TS3, qué extensiones tiene cada uno de ellos
-y en qué ficheros se encuentran.**
+### 3. Crea el tablespace TS3 gestionado localmente con un tamaño de extension uniforme de 128K y un fichero de datos asociado. Cambia la ubicación del fichero de datos y modifica la base de datos para que pueda acceder al mismo. Crea en TS3 dos tablas e inserta registros en las mismas. Comprueba que segmentos tiene TS3, qué extensiones tiene cada uno de ellos y en qué ficheros se encuentran.
 
 **Creamos el tablespace TS3**, en este caso de 100M, con un tamaño de extensión uniforme de gestión local establecido en 138 KB.
 
@@ -177,9 +167,7 @@ select file_name from dba_data_files where file_id = 16;
 
 Como vemos el **extent_id** tiene el valor 0. En Oracle, un **extent_id** con **valor 0** significa que se trata de un sistema extent y que está siendo utilizado para almacenar objetos internos de la base de datos.
 
-**4. Redimensiona los ficheros asociados a los tres tablespaces
-que has creado de forma que ocupen el mínimo espacio posible
-para alojar sus objetos.**
+### 4. Redimensiona los ficheros asociados a los tres tablespaces que has creado de forma que ocupen el mínimo espacio posible para alojar sus objetos.
 
 Antes que nada comprobaremos si los tablespace son **SYSTEM** o **NON-SYSTEM**, consultando la tabla **DBA_TABLESPACES**, concretamente la columna **CONTENTS**. Lo haremos mediante la siguiente consulta:
 
@@ -210,10 +198,7 @@ ALTER DATABASE DATAFILE '/opt/oracle/oradata/ORCLCDB/ts3/ts3.dbf' RESIZE 2M
 ![Ejercicio4_resize](capturas/4.2.resize.png)
 
 
-**5. Realiza un procedimiento llamado InformeRestricciones que
-reciba el nombre de una tabla y muestre los nombres de las
-restricciones que tiene, a qué columna o columnas afectan y
-en qué consisten exactamente.**
+### 5. Realiza un procedimiento llamado InformeRestricciones que reciba el nombre de una tabla y muestre los nombres de las restricciones que tiene, a qué columna o columnas afectan y en qué consisten exactamente.
 
 **Procedimiento Principal**
 
@@ -278,9 +263,7 @@ END;
 ![Ejercicio5_Comprobacion](capturas/5.2.comprobacion.png)
 
 
-**6. Realiza un procedimiento llamado MostrarAlmacenamientoUsuario
-que reciba el nombre de un usuario y devuelva el espacio que
-ocupan sus objetos agrupando por dispositivos y archivos:**
+### 6. Realiza un procedimiento llamado MostrarAlmacenamientoUsuario que reciba el nombre de un usuario y devuelva el espacio que ocupan sus objetos agrupando por dispositivos y archivos:
 
 ```sql
 Usuario: NombreUsuario
@@ -333,7 +316,7 @@ WHERE TABLESPACE_NAME IN (
 
 ## Postgres:
 
-**7. Averigua si es posible establecer cuotas de uso sobre los tablespaces en Postgres.**
+### 7. Averigua si es posible establecer cuotas de uso sobre los tablespaces en Postgres.
 
 Tras investigar bastante, he llegado a la conclusión de que sí podemos establecer cuotas de uso sobre los tablespaces en Postgres, aunque esta característica no está incorporada directamente en la base de datos. Por lo que tendremos que recurrir a otros métodos para limitar la cantidad de espacio que consumirán un usuario o un conjunto de objetos en el sistema de archivos.
 
@@ -357,10 +340,10 @@ Editamos el fichero **/etc/fstab** y añadimos los siguiente parámetros, en la 
 
 ## MySQL:
 
-**8. Averigua si existe el concepto de extensión en MySQL y si coincide con el existente en ORACLE.**
+### 8. Averigua si existe el concepto de extensión en MySQL y si coincide con el existente en ORACLE.
 
 
 
 ## MongoDB:
 
-**9. Averigua si en MongoDB puede saberse el espacio disponible para almacenar nuevos documentos.**
+### 9. Averigua si en MongoDB puede saberse el espacio disponible para almacenar nuevos documentos.
