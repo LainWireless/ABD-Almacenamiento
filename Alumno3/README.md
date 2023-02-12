@@ -357,7 +357,7 @@ sudo quotacheck -ugm /
 Activamos el sistema de quotas:
 
 ```shell
-sudo quotacheck -ugm /
+sudo quotaon -v /
 ```
 
 ![Ejercicio7_ActivarSistemaDeQuotas](capturas/7.3.activar_sistema_de_quotas.png)
