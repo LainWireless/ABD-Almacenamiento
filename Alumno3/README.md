@@ -320,7 +320,7 @@ WHERE TABLESPACE_NAME IN (
 
 Tras investigar bastante, he llegado a la conclusión de que sí podemos establecer cuotas de uso sobre los tablespaces en Postgres, aunque esta característica no está incorporada directamente en la base de datos. Por lo que tendremos que recurrir a otros métodos para limitar la cantidad de espacio que consumirán un usuario o un conjunto de objetos en el sistema de archivos.
 
-### ***Desde el intérprete del sistema (Bash)***
+### **Desde el intérprete del sistema (Bash)**
 
 Podemos optar por el método del uso de **quotas** del sistema. Para ello seguiremos los siguientes pasos:
 
@@ -372,7 +372,7 @@ sudo edquota -u usuario
 
 Con esto le habríamos asignado una cuota máxima de tamaño a un usuario específico en la partición donde se aloja el tablespace.
 
-### ***Desde el intérprete de Postgres***
+### **Desde el intérprete de Postgres**
 
 Desde el intérprete de Postgres, también contamos con algunos métodos para gestionar el almacenamiento del usuario, por ejemplo:
 
