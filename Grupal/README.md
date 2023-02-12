@@ -206,7 +206,7 @@ SELECT * FROM DBA_DB_LINKS;
 
 ![Grupal](capturas/grupal-4-1.png)
 
-Es evidente que hay alguna línea de conexión que está utilizando la entrada tns1, por lo tanto, no deberíamos eliminarla. Si hubiera más vínculos descritos, entonces podríamos suprimir esas sin preocuparnos de interrumpir alguna conexión, ya que no estaríamos borrando aquellas que estén siendo usadas.
+Es evidente que hay alguna línea de conexión que está utilizando la entrada oracle1, por lo tanto, no deberíamos eliminarla. Si hubiera más vínculos descritos, entonces podríamos suprimir esas sin preocuparnos de interrumpir alguna conexión, ya que no estaríamos borrando aquellas que estén siendo usadas.
 
 Para borrar una entrada de tnsnames.ora, tendremos que localizar el fichero en la ruta especificada y modificarlo. La ruta al fichero puede variar dependiendo de la ubicación y el sistema operativo, por lo que tendremos que asegurarnos de dirigirnos a la ubicación correcta. Una vez allí, bastará con eliminar la línea asociada a la entrada que se desea borrar.
 
@@ -226,9 +226,14 @@ nano /opt/oracle/product/19c/dbhome_1/network/admin/tnsnames.ora
 ![Grupal](capturas/grupal-4-3.png)
 
 
-Ahora, procedemos a borrar la entrada oracle1:
+Ahora, procedemos a borrar la entrada oracle1 (no deberíamos hacerlo ya que está siendo usada pero lo haremos para el ejemplo):
 
 ![Grupal](capturas/grupal-4-4.png)
+
+Tras editar el fichero, guardamos los cambios y reiniciamos el servicio de listener. La entrada oracle1 ya no aparecerá en la lista de entradas del fichero tnsnames.ora:
+```bash
+lsnrctl reload
+```
 
 ## Ejercicio 6:
 
