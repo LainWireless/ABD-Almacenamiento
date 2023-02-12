@@ -455,17 +455,125 @@ Resumiendo, las ventajas del sharding son:
 
 Una vez explicado el sharding, vamos a proceder a montarlo. Para ello, necesitaremos tener instalado MongoDB en varios equipos. En mi caso, lo tengo instalado en Linux. Para ello, vamos a seguir estos pasos:
 
+1. Creación de 5 máquinas virtuales con Debian 11 en Vagrant. Para ello usaremos el siguiente Vagrantfile:
+```ruby
+Vagrant.configure("2") do |config|
+  config.vm.box = "debian/bullseye64"
+  config.vm.define "shard1" do |shard1|
+    shard1.vm.hostname = "shard1"
+    shard1.vm.network "private_network", ip: "10.0.0.1"
+    end
+    config.vm.define "shard2" do |shard2|
+    shard2.vm.hostname = "shard2"
+    shard2.vm.network "private_network", ip: "10.0.0.2"
+    end
+    config.vm.define "shard3" do |shard3|
+    shard3.vm.hostname = "shard3"
+    shard3.vm.network "private_network", ip: "10.0.0.3"
+    end
+    config.vm.define "shard4" do |shard4|
+    shard4.vm.hostname = "shard4"
+    shard4.vm.network "private_network", ip: "10.0.0.4"
+    end
+    config.vm.define "shard5" do |shard5|
+    shard5.vm.hostname = "shard5"
+    shard5.vm.network "private_network", ip: "10.0.0.5"
+    end
+end
+```
 
-1. **Configuración de la red:** configuramos los sistemas Linux para que estén conectados entre sí a través de la red, usando configuraciones estáticas IP.
+2. Instalamos MongoDB en el primer equipo:
+```bash
+sudo apt install mongodb
+```
 
-2. **Instalación de MongoDB:** instalamos MongoDB en cada uno de los sistemas Linux.
+3. Creamos el directorio de datos:
+```bash
+sudo mkdir -p /data/db
+```
 
-3. **Configuración de los config servers:** configuramos los servidores de configuración (config servers) en el sistema Linux que los hospede. Configuramos la cadena de réplica de los servidores de configuración para que se sincronicen entre ellos.
+4. Cambiamos el propietario del directorio de datos:
+```bash
+sudo chown -R mongodb:mongodb /data/db
+```
 
-4. **Configuración de los servidores query routers:** configuramos los servidores query routers en los sistemas Linux para que puedan acceder a los servidores de configuración.
+5. Iniciamos el servicio de MongoDB:
+```bash
+sudo systemctl start mongodb
+```
 
-5. **Configuración de los servidores de almacenamiento:** configuramos los servidores de almacenamiento (shards) en los sistemas Linux para que puedan acceder a los servidores query routers.
+6. Comprobamos que el servicio está activo:
+```bash
+sudo systemctl status mongodb
+```
 
-6. **Configuración del sharding:** usamos la herramienta mongo para configurar el sharding en los servidores de almacenamiento, indicando qué bases de datos y colecciones deben estar en cada uno.
+7. Repetimos los pasos 2 a 6 en los otros 4 equipos.
 
-7. **Prueba del sharding:** realizamos pruebas del sharding para asegurarnos de que todo está funcionando correctamente.
+8. Ahora, vamos a configurar el sharding. Para ello, nos conectamos al primer equipo:
+```bash
+mongo
+```
+
+9. Creamos la base de datos:
+```sql
+use test
+```
+
+10. Creamos la colección:
+```sql
+db.createCollection("test")
+```
+
+11. Creamos el shard:
+```sql
+sh.addShard("shard1:27017")
+```
+
+12. Repetimos los pasos 9 a 11 en los otros 4 equipos.
+- En el segundo equipo, el shard será shard2:27017.
+- En el tercer equipo, el shard será shard3:27017.
+- En el cuarto equipo, el shard será shard4:27017.
+  
+13. Ahora, vamos a crear un cluster de sharding. Para ello, nos conectamos al primer equipo y nos conectamos a la base de datos creada anteriormente:
+```sql
+use test
+```
+
+14. Creamos el cluster de sharding:
+```sql
+sh.enableSharding("test")
+```
+
+15. Ahora, vamos a crear un shard key. Para ello, nos conectamos al primer equipo y nos conectamos a la base de datos creada anteriormente:
+```sql
+use test
+sh.shardCollection("test.test", { _id: "hashed" })
+```
+
+16. Ahora, vamos a insertar datos en la base de datos. Para ello, nos conectamos al primer equipo y nos conectamos a la base de datos creada anteriormente:
+```sql
+use test
+```
+
+17.  Insertamos mil datos:
+```sql
+for (var i = 0; i < 100000; i++) {
+    db.test.insert({ _id: i, x: i })
+}
+```
+
+18.  Comprobamos que los datos se han insertado correctamente:
+```sql
+db.test.find()
+```
+
+![Grupal](capturas/grupal-7-1.png)
+
+![Grupal](capturas/grupal-7-2.png)
+
+![Grupal](capturas/grupal-7-3.png)
+
+![Grupal](capturas/grupal-7-4.png)
+
+![Grupal](capturas/grupal-7-5.png)
+
