@@ -1,3 +1,113 @@
+# Parte grupal:
+
+## 1. Cread un índice para la tabla EMP de SCOTT que agilice las consultas por nombre de empleado en un tablespace creado específicamente para índices. ¿Dónde deberiáis ubicar el fichero de datos asociado? ¿Cómo se os ocurre que podriáis probar si el índice resulta de utilidad?
+
+Modificamos la tabla emp para que admita 100.000 registros:
+```sql
+alter table scott.emp modify (empno number(5));
+```
+
+Primero voy a crear un procedimiento que me cree 100.000 registros en la tabla EMP de SCOTT:
+```sql
+CREATE OR REPLACE PROCEDURE add_100000_emp
+AS
+v_nombre scott.emp.ename%TYPE;
+BEGIN
+    FOR i IN 0..99999 LOOP
+        v_nombre := 'e' || i;
+        INSERT INTO scott.emp VALUES (i, v_nombre, 'CLERK', 7902, TO_DATE('01/01/1980', 'DD/MM/YYYY'), 1000, 1000 , 20);
+    END LOOP;
+END;
+/
+exec add_100000_emp;
+```
+
+Antes de ejecutar el procedimiento, voy a eliminar todo el contenido de la tabla EMP:
+```sql
+delete from scott.emp;
+```
+
+Vamos a comprobar el rendimiento de la búsqueda de un registro en la tabla EMP sin índice. Primero, vamos a activar el modo de depuración y el modo de traza de la sesión:
+```sql
+set serveroutput on
+set autotrace on
+```
+Tras esto, ejecutamos la siguiente consulta:
+```sql
+select * from scott.emp where ename = 'e77777';
+```
+![Grupal](capturas/grupal-1-0.png)
+
+Ahora tenemos que crear un tablespace, por lo que debemos elegir qué datafiles vamos a asociarle. Por defecto estos ficheros se guardan en el directorio /opt/oracle/oradata/ORCLCDB/, pero en función de la frecuencia con la que utilicemos este índice, podríamos guardarlo en un dispositivo de bloques con mayor velocidad de lectura, como por ejemplo en un SSD. Vamos a suponer que tenemos un SSD (/dev/vdb), el cual formatearemos como ext4 y montaremos en /opt/oracle/oradata/ORCLCDB/ssd
+
+Primero creamos el directorio y asignamos los permisos y propietario adecuados.
+```bash
+mkdir /opt/oracle/oradata/ORCLCDB/ssd
+chown oracle: /opt/oracle/oradata/ORCLCDB/ssd
+chmod 700 /opt/oracle/oradata/ORCLCDB/ssd
+mkfs.ext4 /dev/vdb
+```
+
+Creamos una unidad de systemd en /etc/systemd/system/ para que se monte automáticamente al arrancar el sistema. Dicha unidad tendrá el siguiente contenido:
+```bash
+nano /etc/systemd/system/opt-oracle-oradata-ORCLCDB-ssd.mount
+
+[Unit]
+Description= SSD for Oracle indexes storaging purposes
+
+[Mount]
+What=/dev/vdb
+Where=/opt/oracle/oradata/ORCLCDB/ssd
+Type=ext4
+Options=defaults
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Para el montado automático al inicio del sistema, habilitamos el servicio.
+```bash
+systemctl daemon-reload
+systemctl start opt-oracle-oradata-ORCLCDB-ssd.mount
+systemctl enable opt-oracle-oradata-ORCLCDB-ssd.mount
+```
+![Grupal](capturas/grupal-1-2.png)
+
+Para crear el tablespace, ejecutamos la siguiente instrucción:
+```sql
+create tablespace indices_emp datafile '/opt/oracle/oradata/ORCLCDB/ssd/indices_emp.dbf' size 10M autoextend on extent management local;
+```
+![Grupal](capturas/grupal-1-3.png)
+
+A continuación, creamos el índice:
+```sql
+CREATE INDEX nombres_empleados ON scott.emp(ename) TABLESPACE indices_emp;
+```
+![Grupal](capturas/grupal-1-4.png)
+
+Comprobamos que el tablespace se ha creado correctamente:
+```sql
+select FILE_NAME, TABLESPACE_NAME from dba_data_files;
+```
+![Grupal](capturas/grupal-1-5.png)
+
+Comprobamos que el índice se ha creado correctamente:
+```sql
+select index_name, tablespace_name from dba_indexes where table_name = 'EMP';
+```
+![Grupal](capturas/grupal-1-6.png)
+
+Vamos a comprobar el rendimiento de la búsqueda de un registro en la tabla EMP con índice:
+```sql
+set serveroutput on
+set autotrace on
+select * from scott.emp where ename = 'e77777';
+```
+![Grupal](capturas/grupal-1-7.png)
+
+Para comprobar la utilidad de este índice, necesitaríamos que la tabla EMP tuviera aún muchos más registros. De esta manera, veríamos un aumento de rendimiento en comparación a no tener un índice definido. También, hay que tener en cuenta que es un escenario irreal.
+También, el campo ename es un campo de tipo VARCHAR2, por lo que no consume mucho espacio en memoria. Si el campo fuera de tipo CHAR, el índice sería más útil, ya que el tamaño de los registros sería mayor debido a que CHAR rellena con espacios los campos que no ocupan todo el espacio reservado.
+
 ## Ejercicio 2:
 
 **Realizad una consulta al diccionario de datos que muestre qué índices existen para objetos pertenecientes al esquema de SCOTT y sobre qué columnas están definidos.**
@@ -85,6 +195,40 @@ Para recuperar el valor actual de una secuencia usamos:
 
  Como vemos es símilar a **nextval**, solo que **"currval"** es una forma abreviada de **"current value"**, es decir, valor actual.
 
+## 4. Queremos limpiar nuestro fichero tnsnames.ora. Averiguad cuales de sus entradas se están usando en algún enlace de la base de datos.
+
+Antes de poder eliminar entradas inactivas en el archivo tnsnames.ora, es importante identificar cuáles entradas están siendo usadas por los enlaces activos existentes. Esto ayudará a asegurarse de que ninguna entrada esencial sea removida accidentalmente.
+
+Para ello, usaremos el siguiente comando:
+```sql
+SELECT * FROM DBA_DB_LINKS;
+```
+
+![Grupal](capturas/grupal-4-1.png)
+
+Es evidente que hay alguna línea de conexión que está utilizando la entrada tns1, por lo tanto, no deberíamos eliminarla. Si hubiera más vínculos descritos, entonces podríamos suprimir esas sin preocuparnos de interrumpir alguna conexión, ya que no estaríamos borrando aquellas que estén siendo usadas.
+
+Para borrar una entrada de tnsnames.ora, tendremos que localizar el fichero en la ruta especificada y modificarlo. La ruta al fichero puede variar dependiendo de la ubicación y el sistema operativo, por lo que tendremos que asegurarnos de dirigirnos a la ubicación correcta. Una vez allí, bastará con eliminar la línea asociada a la entrada que se desea borrar.
+
+Pasemos a la acción. En primer lugar, localizamos el fichero tnsnames.ora:
+```bash
+find / -name tnsnames.ora | grep "tnsnames.ora"
+```
+
+![Grupal](capturas/grupal-4-2.png)
+
+El que nos interesa es el que se encuentra en la ruta /opt/oracle/product/19c/dbhome_1/network/admin/tnsnames.ora.
+Si abrimos el fichero, veremos que hay varias entradas:
+```bash
+nano /opt/oracle/product/19c/dbhome_1/network/admin/tnsnames.ora
+```
+
+![Grupal](capturas/grupal-4-3.png)
+
+
+Ahora, procedemos a borrar la entrada oracle1:
+
+![Grupal](capturas/grupal-4-4.png)
 
 ## Ejercicio 6:
 
@@ -291,3 +435,32 @@ CREATE TABLE SCOTT.EMP1
 )
  CLUSTER tablasempdept (DEPTNO);
 ```
+
+## 7. Explicad en qué consiste el sharding en MongoDB. Intentad montarlo.
+
+El sharding en MongoDB es una técnica de partición de datos que diviede los datos de una base de datos en partes más pequeñas para mejorar el rendimiento y la escalabilidad de la base de datos. Esto se logra almacenando los datos en diferentes servidores o máquinas. Los datos se dividen en "shards" o trozos, para proporcionar una mejor distribución de los datos en todas las máquinas. Esto también permite que una base de datos sea capaz de manejar una carga de trabajo mucho mayor que una sola máquina. El sharding también ayuda a reducir los tiempos de respuesta al permitir que los datos se lean y escriban en múltiples servidores en paralelo.
+
+Resumiendo, las ventajas del sharding son:
+
+- Mejorar el rendimiento y la escalabilidad de la base de datos. 
+
+- Permitir que una base de datos pueda manejar una carga de trabajo mucho mayor que una sola máquina.
+ 
+- Reducir los tiempos de respuesta al permitir que los datos se lean y escriban en múltiples servidores en paralelo.
+
+Una vez explicado el sharding, vamos a proceder a montarlo. Para ello, necesitaremos tener instalado MongoDB en varios equipos. En mi caso, lo tengo instalado en Linux. Para ello, vamos a seguir estos pasos:
+
+
+1. **Configuración de la red:** configuramos los sistemas Linux para que estén conectados entre sí a través de la red, usando configuraciones estáticas IP.
+
+2. **Instalación de MongoDB:** instalamos MongoDB en cada uno de los sistemas Linux.
+
+3. **Configuración de los config servers:** configuramos los servidores de configuración (config servers) en el sistema Linux que los hospede. Configuramos la cadena de réplica de los servidores de configuración para que se sincronicen entre ellos.
+
+4. **Configuración de los servidores query routers:** configuramos los servidores query routers en los sistemas Linux para que puedan acceder a los servidores de configuración.
+
+5. **Configuración de los servidores de almacenamiento:** configuramos los servidores de almacenamiento (shards) en los sistemas Linux para que puedan acceder a los servidores query routers.
+
+6. **Configuración del sharding:** usamos la herramienta mongo para configurar el sharding en los servidores de almacenamiento, indicando qué bases de datos y colecciones deben estar en cada uno.
+
+7. **Prueba del sharding:** realizamos pruebas del sharding para asegurarnos de que todo está funcionando correctamente.
