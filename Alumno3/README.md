@@ -320,7 +320,9 @@ WHERE TABLESPACE_NAME IN (
 
 Tras investigar bastante, he llegado a la conclusión de que sí podemos establecer cuotas de uso sobre los tablespaces en Postgres, aunque esta característica no está incorporada directamente en la base de datos. Por lo que tendremos que recurrir a otros métodos para limitar la cantidad de espacio que consumirán un usuario o un conjunto de objetos en el sistema de archivos.
 
-En este caso optaré por el método del uso de **quotas** del sistema. Para ello seguiremos los siguientes pasos:
+#### Desde el intérprete del sistema (Bash)
+
+Podemos optar por el método del uso de **quotas** del sistema. Para ello seguiremos los siguientes pasos:
 
 Instalamos el paquete quota:
 
@@ -332,10 +334,65 @@ Editamos el fichero **/etc/fstab** y añadimos los siguiente parámetros, en la 
 
 ![Ejercicio7_fstab](capturas/7.1.fstab.png)
 
+Montamos de nuevo la partición correspondiente:
 
+```shell
+sudo mount -o remount /
+```
 
+Verificamos que se hayan aplicado las nuevas opciones a la hora de montar el sistema de archivos, en este caso, mediante el comando:
 
+```shell
+cat /proc/mounts | grep ' / '
+```
 
+![Ejercicio7_VerificarMontaje](capturas/7.2.verificar_montaje.png)
+
+Habilitamos las quotas:
+
+```shell
+sudo quotacheck -ugm /
+```
+
+Activamos el sistema de quotas:
+
+```shell
+sudo quotacheck -ugm /
+```
+
+![Ejercicio7_ActivarSistemaDeQuotas](capturas/7.3.activar_sistema_de_quotas.png)
+
+Ahora podremos modificar las cuotas de los usuarios mediante el comando:
+
+```shell
+sudo edquota -u usuario
+```
+
+![Ejercicio7_quota_postgres](capturas/7.4.quota_postgres.png)
+
+Con esto le habríamos asignado una cuota máxima de tamaño a un usuario específico en la partición donde se aloja el tablespace.
+
+#### Desde el intérprete de Postgres
+
+Desde el intérprete de Postgres, también contamos con algunos métodos para gestionar el almacenamiento del usuario, por ejemplo:
+
+Creamos un nuevo tablespace llamado **"tablespace_limitado"**, en una ubicación donde tengamos un tamaño máximo definido en el sistema (Como puede ser un volumen lógico):
+
+```sql
+CREATE TABLESPACE tablespace_limitado LOCATION '/path/to/tablespace_limitado';
+```
+
+Creamos un nuevo esquema llamado **"schema_limitado"** dentro del tablespace **"tablespace_limitado"**:
+
+```sql
+CREATE SCHEMA schema_limitado IN tablespace_limitado;
+```
+
+Asignamos permisos de uso al usuario **"usuario"** sobre el esquema "schema_limitado"
+
+```sql
+GRANT USAGE ON SCHEMA schema_limitado TO usuario;
+```
 
 
 ## MySQL:
