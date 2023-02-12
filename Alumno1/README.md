@@ -18,6 +18,13 @@ select FILE_NAME, TABLESPACE_NAME from dba_data_files UNION select FILE_NAME, TA
 
 Con esta consulta, mostraremos los ficheros de datos y los ficheros temporales que componen los tablespaces.
 
+Como último dato, podremos ver de que tipo son las extensiones de cada tablespace con la siguiente consulta:
+```sql
+select TABLESPACE_NAME, EXTENT_MANAGEMENT 
+from DBA_TABLESPACES;
+```
+![Alumno1](capturas/alumno1-oracle-1-2.png)
+
 En mi caso, están las extensiones gestionadas localmente. Esto se debe a que cuando se instaló Oracle, se instaló con la opción de que las extensiones se gestionen localmente.
 
 ### 2. Usa la vista del diccionario de datos v$datafile para mirar cuando fue la última vez que se ejecutó el proceso CKPT en tu base de datos.
