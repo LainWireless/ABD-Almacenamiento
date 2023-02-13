@@ -403,7 +403,7 @@ Sí, existe el concepto de extent en MySQL, y además coincide con el existente 
 
 La principal diferencia es que en MySQL su nomenclatura define que un **extent**, es una agrupación de **pages** a diferencia de los **data blocks** en Oracle, que son un número específico de bloques contiguos usados para almacenar un tipo específico de información.
 
-***En MySQL:***
+**En MySQL:**
 
 Un archivo de datos **InnoDB** o archivo ibd es una secuencia de páginas del mismo tamaño. Estas páginas se agrupan en extensiones y segmentos. 
 
@@ -423,7 +423,7 @@ Los extents se utilizan en los motores de almacenamiento que implementan el sist
 
 Cada extent contiene un número fijo de páginas de disco, y los datos de una tabla se dividen en varios extents para aumentar la eficiencia y mejorar el rendimiento. Por ejemplo, cuando una tabla crece y necesita más espacio, InnoDB puede asignar un nuevo extent para almacenar los datos adicionales.
 
-***En Oracle:***
+**En Oracle:**
 
 Un extent en Oracle es un bloque de almacenamiento contiguo en el disco que se utiliza para almacenar datos de una tabla o índice. Cada tabla o índice en Oracle se divide en una serie de extents, y cada extent se compone de un número específico de bloques de datos.
 
