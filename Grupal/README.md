@@ -452,3 +452,7 @@ Resumiendo, las ventajas del sharding son:
 - Permitir que una base de datos pueda manejar una carga de trabajo mucho mayor que una sola máquina.
  
 - Reducir los tiempos de respuesta al permitir que los datos se lean y escriban en múltiples servidores en paralelo.
+
+He intentado montarlo siguiendo varias documentaciones, al final la documentación que parece estar más completa y con todos los pasos mejor explicados es la de [DigitalOcean](https://www.digitalocean.com/community/tutorials/how-to-use-sharding-in-mongodb).
+
+Sin embargo, ya he pasado demasiado tiempo intentando hacerlo sguiendo otras documentaciones y por cuestiones de tiempo no he podido seguir con el ejercicio porque como se puede ver en la página web la documentación es bastante extensa y está en inglés y no tengo mucho tiempo para traducirla y entenderla.
