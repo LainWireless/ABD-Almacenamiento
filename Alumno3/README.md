@@ -434,3 +434,55 @@ El uso de extents permite a Oracle administrar de manera eficiente el espacio en
 ## MongoDB:
 
 ### 9. Averigua si en MongoDB puede saberse el espacio disponible para almacenar nuevos documentos.
+
+Sí, en MongoDB podemos conocer el espacio disponible para almacenar nuevos documentos.
+
+#### Comprobar el espacio disponible en la base de datos:
+
+Con el comando **"db.stats()"** podremos ver información detallada sobre el tamaño de la base de datos (actual/en uso), incluyendo el tamaño en disco, el número de documentos, la cantidad de espacio utilizado y la cantidad de espacio disponible.
+
+También podemos ejecutarlo de la siguiente forma:
+
+```mongodb
+db.runCommand( { dbStats: 1, scale: 1024, freeStorage: 1 } )
+```
+
+Parámetros aplicados:
+
+**dbStats:** El comando devuelve estadísticas de almacenamiento para una base de datos dada.
+
+**Scale:** (Opcional). El factor de escala para los distintos datos de tamaño. El valor "scale" predeterminado es 1 para devolver datos de tamaño en bytes. Para mostrar kilobytes en lugar de bytes, especificamos un scale valor de 1024.
+
+**freeStorage** (Opcional). Para devolver detalles sobre el espacio libre asignado a las colecciones, establezca freeStorageen 1.
+
+
+![Ejercicio8_fs_size](capturas/8.1.fs_size.png)
+
+
+#### Comprobar el espacio disponible en una colección específica:
+
+Con el siguiente comando obtendremos información detallada sobre la colección (En este caso **"profesores"**), incluyendo el tamaño de la colección, el número de documentos, el espacio utilizado y el espacio disponible.
+
+```mongodb
+db.profesores.stats()
+```
+
+o
+
+```mongodb
+db.runCommand({"collStats": "profesores"})
+```
+
+
+También podemos utilizar el siguiente comando para filtrar y obtener solo el freeStorageSize de una colección:
+
+```mongodb
+db.runCommand({collStats: "profesores", scale: 1024}).freeStorageSize
+```
+
+Al utilizar el parámetro (**"scale: 1024"**), especificamos que la información se devuelva en KiloBytes.
+
+![Ejercicio8_collection_size](capturas/8.2.collection_size.png)
+
+
+En resumen, este comando obtiene el espacio de almacenamiento disponible en kilobytes de la colección **"profesores"** en MongoDB.
