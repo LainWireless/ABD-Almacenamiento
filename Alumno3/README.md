@@ -399,7 +399,37 @@ GRANT USAGE ON SCHEMA schema_limitado TO usuario;
 
 ### 8. Averigua si existe el concepto de extensión en MySQL y si coincide con el existente en ORACLE.
 
+Sí, existe el concepto de extent en MySQL, y además coincide con el existente en Oracle.
 
+La principal diferencia es que en MySQL su nomenclatura define que un **extent**, es una agrupación de **pages** a diferencia de los **data blocks** en Oracle, que son un número específico de bloques contiguos usados para almacenar un tipo específico de información.
+
+***En MySQL:***
+
+Un archivo de datos **InnoDB** o archivo ibd es una secuencia de páginas del mismo tamaño. Estas páginas se agrupan en extensiones y segmentos. 
+
+Una extensión o extent es una **secuencia contigua de páginas** (porción contigua de espacio en el disco) en un archivo ibd. El número de páginas que pertenecen a una extensión dependerá del tamaño de la página.
+
+La siguiente tabla proporciona la relación entre el tamaño de página y el tamaño de extensión (en páginas y megabytes):
+
+| **Tamaño de página** | **Tamaño de extensión en páginas** | **Tamaño de extensión en MB** |
+|----------------------|------------------------------------|-------------------------------|
+|          4 KB        |                 256                |              1 MB             |
+|          8 KB        |                 128                |              1 MB             |
+|         16 KB        |                 64                 |              1 MB             |
+|         32 KB        |                 64                 |              2 MB             |
+|         64 KB        |                 64                 |              4 MB             |
+
+Los extents se utilizan en los motores de almacenamiento que implementan el sistema de gestión de tablas InnoDB, y su objetivo es mejorar la eficiencia y la gestión del espacio en disco.
+
+Cada extent contiene un número fijo de páginas de disco, y los datos de una tabla se dividen en varios extents para aumentar la eficiencia y mejorar el rendimiento. Por ejemplo, cuando una tabla crece y necesita más espacio, InnoDB puede asignar un nuevo extent para almacenar los datos adicionales.
+
+***En Oracle:***
+
+Un extent en Oracle es un bloque de almacenamiento contiguo en el disco que se utiliza para almacenar datos de una tabla o índice. Cada tabla o índice en Oracle se divide en una serie de extents, y cada extent se compone de un número específico de bloques de datos.
+
+El tamaño de un extent es determinado por el parámetro de inicialización del tamaño del bloque del sistema y por el número de bloques que componen el extent. Por ejemplo, si el tamaño de un bloque de datos es de 8 kilobytes y un extent está compuesto por 4 bloques, el tamaño total del extent será de 32 kilobytes.
+
+El uso de extents permite a Oracle administrar de manera eficiente el espacio en disco, permitiendo el crecimiento dinámico de las tablas y índices en pequeños bloques contiguos en lugar de una sola gran extensión. Además, los extents permiten una mayor concurrencia de lectura y escritura, ya que cada extent es una unidad de almacenamiento independiente.
 
 ## MongoDB:
 
