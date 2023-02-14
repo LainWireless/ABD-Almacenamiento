@@ -4,7 +4,7 @@ PRÁCTICA TEMA 4: ALMACENAMIENTO
 ## **Desempeño de Roles**
 
 - **Felipe - Investigador**
-- **Iván - Capitán y Portavoz ✒️**
+- **Iván - Capitán y Portavoz**
 - **Alfonso - Secretario**
 
 ## **Documentación de partes individuales y grupal**
