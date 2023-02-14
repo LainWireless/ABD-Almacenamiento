@@ -141,7 +141,7 @@ select max(deptno) from dept;
 ```
 
 ##### Crear la secuencia 
-(Inicializando el valor obtenido en la consulta anterior, en este caso 40):
+(Inicializando el siguiente valor que el obtenido en la consulta anterior, en este caso 41):
 
 ```sql
 create sequence sec_deptno
