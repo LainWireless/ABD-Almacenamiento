@@ -288,30 +288,82 @@ Dispositivo: yyyy
 Total Espacio Usuario en la BD: nnnnnnn K
 ```
 
-**Procedimiento Principal (Incompleto)**
+**Procedimiento Principal**
 ```sql
 CREATE OR REPLACE PROCEDURE MostrarAlmacenamientoUsuario(p_usuario VARCHAR2)
 IS
     cursor c_objetos is
-    select distinct e.partition_name as dispositivo,f.file_name as archivo from dba_extents e, dba_data_files f where f.file_id=e.file_id and owner=upper(p_usuario); 
+    select distinct REGEXP_SUBSTR(f.file_name, '^/[^/]+') as dispositivo, f.file_name as ruta_archivo,REGEXP_SUBSTR(f.file_name, '[^/]+$') as archivo, f.file_id as id_fichero from dba_extents e, dba_data_files f where f.file_id=e.file_id and owner=upper(p_usuario);
 BEGIN
     dbms_output.put_line('Usuario: '||p_usuario);
     for objeto in c_objetos loop
-    dbms_output.put_line('Dispositivo: '||objeto.dispositivo||chr(10)||'Archivo: '||objeto.archivo);
+    dbms_output.put_line(chr(10)||chr(9)||'Dispositivo: '||objeto.dispositivo||chr(10)||chr(9)||chr(9)||'Archivo: '||objeto.ruta_archivo||chr(10));
+    Mostrar_tablas_archivo_por_usuario(p_usuario,objeto.id_fichero);
+    Mostrar_indices_archivo_por_usuario(p_usuario,objeto.id_fichero);
+    dbms_output.put_line(chr(10)||chr(9)||chr(9)||chr(9)||'Total Espacio en Archivo '||objeto.archivo||': '||Devolver_espacio_fichero(p_usuario, objeto.id_fichero)||' K');
     end loop;
+    dbms_output.put_line(chr(10)||'Total Espacio Usuario en la BD: '||Devolver_espacio_usuario(p_usuario)||' K');
 END;
 /
+
+CREATE OR REPLACE PROCEDURE Mostrar_tablas_archivo_por_usuario(p_usuario VARCHAR2, p_id_fichero NUMBER)
+is
+    cursor c_tablas is
+    select distinct t.table_name as tab, e.bytes/1024 as kilobytes
+    from dba_tables t, dba_extents e 
+    where t.owner=upper(p_usuario) and t.owner=e.owner and e.file_id=p_id_fichero;
+    v_cont number := 1;
+    v_punto varchar(1) := '.';
+begin
+    for tabla in c_tablas loop
+        dbms_output.put_line(chr(9)||chr(9)||chr(9)||'Tabla'||v_cont||RPAD(v_punto,10,'.')||tabla.tab||' '||tabla.kilobytes);
+        v_cont:=v_cont+1;
+    end loop;
+    dbms_output.put_line(chr(9));
+end;
+/
+
+CREATE OR REPLACE PROCEDURE Mostrar_indices_archivo_por_usuario(p_usuario VARCHAR2, p_id_fichero NUMBER)
+is
+    cursor c_indices is
+    select distinct i.index_name as ind, e.bytes/1024 as kilobytes
+    from dba_indexes i, dba_extents e 
+    where i.owner=upper(p_usuario) and i.owner=e.owner and e.file_id=p_id_fichero;
+    v_cont number := 1;
+    v_punto varchar(1) := '.';
+begin
+    for indice in c_indices loop
+        dbms_output.put_line(chr(9)||chr(9)||chr(9)||'Indice'||v_cont||RPAD(v_punto,10,'.')||indice.ind||' '||indice.kilobytes);
+        v_cont:=v_cont+1;
+    end loop;
+    dbms_output.put_line(chr(9));
+end;
+/
+
+CREATE OR REPLACE FUNCTION Devolver_espacio_fichero(p_usuario VARCHAR2, p_id_fichero NUMBER)
+return number
+is
+    v_espacio number := 0;
+begin
+    select distinct d.user_bytes/1024 into v_espacio
+    from dba_data_files d, dba_extents e 
+    where e.owner=upper(p_usuario) and d.file_id=e.file_id and d.file_id=p_id_fichero;
+return v_espacio;
+end;
+/
+
+CREATE OR REPLACE FUNCTION Devolver_espacio_usuario(p_usuario VARCHAR2)
+return number
+is
+    v_espacio number := 0;
+begin
+    select SUM(bytes)/1024 into v_espacio
+    from dba_segments
+    where owner = upper(p_usuario);
+return v_espacio;
+end;
+/
 ```
-
---PRUEBAS--------------------------
---Consulta para obtener ficheros de un usuario y su tamaño en (MB)
-
-SELECT FILE_NAME, BYTES/1024/1024
-FROM DBA_DATA_FILES
-WHERE TABLESPACE_NAME IN (
-  SELECT TABLESPACE_NAME
-  FROM ALL_TABLES
-  WHERE OWNER = 'p_usuario');
 
 
 ## Postgres:
