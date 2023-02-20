@@ -301,10 +301,12 @@ BEGIN
     Mostrar_tablas_archivo_por_usuario(p_usuario,objeto.id_fichero);
     Mostrar_indices_archivo_por_usuario(p_usuario,objeto.id_fichero);
     dbms_output.put_line(chr(10)||chr(9)||chr(9)||chr(9)||'Total Espacio en Archivo '||objeto.archivo||': '||Devolver_espacio_fichero(p_usuario, objeto.id_fichero)||' K');
+    dbms_output.put_line(chr(9)||chr(9)||chr(9)||'Total Espacio en Dispositivo '||objeto.dispositivo||': '||Devolver_espacio_dispositivo(p_usuario, objeto.id_fichero)||' K');
     end loop;
     dbms_output.put_line(chr(10)||'Total Espacio Usuario en la BD: '||Devolver_espacio_usuario(p_usuario)||' K');
 END;
 /
+
 
 CREATE OR REPLACE PROCEDURE Mostrar_tablas_archivo_por_usuario(p_usuario VARCHAR2, p_id_fichero NUMBER)
 is
@@ -363,8 +365,29 @@ begin
 return v_espacio;
 end;
 /
+
+-- Suma de espacio de cada bloque
+
+CREATE OR REPLACE FUNCTION Devolver_espacio_dispositivo(p_usuario VARCHAR2, p_id_fichero NUMBER)
+return number
+is
+    v_espacio number := 0;
+begin
+    select sum(d.user_bytes/1024) into v_espacio
+    from dba_data_files d, dba_extents e 
+    where e.owner=upper(p_usuario) and d.file_id=e.file_id and d.file_id=p_id_fichero;
+return v_espacio;
+end;
+/
 ```
 
+### Compilación del procedimiento principal
+
+![Ejercicio6_Comprobacion](capturas/6.1.Compilacion_del_procedimiento_principal.png)
+
+### Prueba de funcionamiento
+
+![Ejercicio6_Comprobacion](capturas/6.2.Ejecucion_del_procedimiento.png)
 
 ## Postgres:
 
