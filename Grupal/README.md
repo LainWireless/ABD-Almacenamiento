@@ -132,6 +132,8 @@ from DBA_SEGMENTS where segment_type='INDEX' and owner='SCOTT');
 
 ## Ejercicio 3:
 
+### Cread una secuencia para rellenar el campo deptno de la tabla dept de forma coherente con los datos ya existentes. Insertad al menos dos registros haciendo uso de la secuencia.
+
 ##### Comprobamos el valor máximo de deptno:
 
 ```sql
@@ -139,7 +141,7 @@ select max(deptno) from dept;
 ```
 
 ##### Crear la secuencia 
-(Inicializando el valor obtenido en la consulta anterior, en este caso 40):
+(Inicializando el siguiente valor que el obtenido en la consulta anterior, en este caso 41):
 
 ```sql
 create sequence sec_deptno
@@ -236,6 +238,8 @@ lsnrctl reload
 ```
 
 ## Ejercicio 6:
+
+### Realizad un procedimiento llamado BalanceoCargaTemp que balancee la carga de usuarios entre los tablespaces temporales existentes. Para ello averiguará cuántos existen y asignará los usuarios entre ellos de forma equilibrada. Si es necesario para comprobar su funcionamiento, crea tablespaces temporales nuevos.
 
 Antes que nada, para poder realizar este ejercicio comenzaremos creando tablespaces temporales y usuarios:
 
